@@ -1,0 +1,4 @@
+# in .cargo/config
+
+[build]
+target = "os_blog.json"
