@@ -27,7 +27,7 @@ use spin::Mutex;
 lazy_static! {
     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
         column_position: 0,
-        color_code: ColorCode::new(Color::LightCyan, Color::Black),
+        color_code: ColorCode::new(Color::White, Color::Black),
         buffer: unsafe { &mut *(0xb8000 as *mut Buffer) }, // Memory-mapped IO
     });
 }
@@ -65,6 +65,10 @@ pub struct Writer {
 }
 
 impl Writer {
+   pub fn set_txt_color(&mut self, color: Color) {
+       self.color_code = ColorCode::new(color, Color::Black);
+   }
+
    pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -73,7 +77,7 @@ impl Writer {
                     self.new_line();
                 }
 
-                let row = BUFFER_HEIGHT - 1;
+                let row = 1;
                 let col = self.column_position;
 
                 let color_code = self.color_code;
@@ -134,6 +138,11 @@ macro_rules! print {
 }
 
 #[macro_export]
+macro_rules! printfatal {
+    ($($arg:tt)*) => ($crate::vga_buffer::_fatal(format_args!($($arg)*)));
+}
+
+#[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
@@ -142,6 +151,13 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
+    WRITER.lock().write_fmt(args).unwrap();
+}
+
+#[doc(hidden)]
+pub fn _fatal(args: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().set_txt_color(Color::Red);
     WRITER.lock().write_fmt(args).unwrap();
 }
 
@@ -171,7 +187,7 @@ fn test_println_output() {
     let s = "Some test string that fits on a single line";
     println!("{}", s);
     for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+        let screen_char = WRITER.lock().buffer.chars[0][i].read();
         assert_eq!(char::from(screen_char.ascii_character), c);
     }
 
