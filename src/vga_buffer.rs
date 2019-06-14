@@ -77,7 +77,7 @@ impl Writer {
                     self.new_line();
                 }
 
-                let row = 1;
+                let row = BUFFER_HEIGHT - 1;
                 let col = self.column_position;
 
                 let color_code = self.color_code;
@@ -187,7 +187,7 @@ fn test_println_output() {
     let s = "Some test string that fits on a single line";
     println!("{}", s);
     for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[0][i].read();
+        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
         assert_eq!(char::from(screen_char.ascii_character), c);
     }
 

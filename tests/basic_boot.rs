@@ -31,3 +31,12 @@ fn test_println() {
     println!("test_println output");
     serial_println!("[ok]");
 }
+
+#[test_case]
+fn test_many_print() {
+    serial_print!("test_println_many...");
+    for _ in 0..100 {
+        println!("stuff");
+    }
+    serial_println!("[ok]");
+}
