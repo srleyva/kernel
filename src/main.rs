@@ -48,13 +48,14 @@ pub extern "C" fn _start() -> ! {
     (as writing to this cause a page fault becuase its unmapped)
     the double fault handler is pushed onto the call stack
     however the memory is still unmapped so this results in another
-    page fault resulting in a tripple fault.
+    page fault resulting in a tripple fault. 
+    See GDT module for the solution to this issue
     */
     // fn stack_overflow() {
     //     stack_overflow();
     // }
 
-    // stack_overflow();
+    //stack_overflow();
 
     #[cfg(test)]
     test_main();
